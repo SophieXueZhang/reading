@@ -120,6 +120,8 @@ if 'show_results' not in st.session_state:
     st.session_state.show_results = False
 if 'selected_grade' not in st.session_state:
     st.session_state.selected_grade = None
+if 'api_key_saved' not in st.session_state:
+    st.session_state.api_key_saved = False
 
 def main():
     """Main application"""
@@ -153,6 +155,11 @@ def show_home():
         st.markdown("### OpenAI API Key Setup")
         st.info("💡 Enter your OpenAI API key to enable AI-powered features (optional)")
 
+        # Show success message if key was just saved
+        if st.session_state.api_key_saved:
+            st.success("🎉 API Key saved successfully! You can now use voice reading!")
+            st.session_state.api_key_saved = False
+
         # Show current status
         current_key = APIConfig.get_api_key()
         if current_key:
@@ -168,22 +175,23 @@ def show_home():
                 "Enter your OpenAI API Key:",
                 type="password",
                 placeholder="sk-proj-...",
-                help="Your API key will be saved securely in the .env file"
+                help="Your API key will be saved securely in the .env file",
+                key="api_key_input"
             )
 
         with col2:
             st.markdown("<br>", unsafe_allow_html=True)  # Spacing
-            if st.button("Save Key", use_container_width=True, type="primary"):
+            if st.button("💾 Save Key", use_container_width=True, type="primary"):
                 if new_api_key:
                     is_valid, message = APIConfig.validate_api_key(new_api_key)
                     if is_valid:
                         APIConfig.save_api_key(new_api_key)
-                        st.success("✓ API key saved successfully!")
+                        st.session_state.api_key_saved = True
                         st.rerun()
                     else:
                         st.error(f"❌ {message}")
                 else:
-                    st.warning("Please enter an API key")
+                    st.warning("⚠️ Please enter an API key")
 
         st.caption("🔒 Your API key is stored locally and never shared")
 
