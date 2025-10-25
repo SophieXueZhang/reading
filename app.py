@@ -508,7 +508,12 @@ def show_session_results():
         if not result['correct']:
             st.markdown(f"Correct answer: **{question.correct_answer}. {question.options[question.correct_answer]}**")
 
-        st.markdown(f"💡 {result['explanation']}")
+            # Show why the answer was wrong
+            if result.get('why_wrong'):
+                st.markdown(f"**❓ Why was I wrong?**")
+                st.markdown(f"_{result['why_wrong']}_")
+
+        st.markdown(f"💡 **Learn More:** {result['explanation']}")
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("")
 
