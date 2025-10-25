@@ -258,8 +258,9 @@ def select_grade():
     for idx, grade in enumerate(grade_options):
         with cols[idx % 3]:
             info = levels[grade]
+            button_text = "Kindergarten" if grade == "K" else f"Grade {grade}"
             if st.button(
-                f"Grade {grade}\n{info['name']}",
+                button_text,
                 key=f"grade_{grade}",
                 use_container_width=True
             ):
