@@ -34,6 +34,7 @@ env/
 
 # User data
 data/user_progress.json
+data/audio_cache/
 
 # Environment variables (contains API keys)
 .env
