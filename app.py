@@ -15,6 +15,7 @@ from questions import QuestionBank
 from evaluator import Evaluator
 from progress_tracker import ProgressTracker
 from api_config import APIConfig
+from tts_helper import TTSHelper
 
 # Page configuration
 st.set_page_config(
@@ -24,46 +25,82 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Custom CSS - Kids Friendly Design
 st.markdown("""
 <style>
+    /* Fun colorful theme for kids */
     .main-header {
-        font-size: 3rem;
-        color: #1E88E5;
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #FFA07A);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-align: center;
         margin-bottom: 2rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
     .passage-card {
-        background-color: #f0f2f6;
-        padding: 2rem;
-        border-radius: 10px;
+        background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%);
+        padding: 2.5rem;
+        border-radius: 20px;
         margin: 1rem 0;
+        border: 3px solid #FFD54F;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-size: 1.1rem;
+        line-height: 1.8;
     }
     .question-card {
-        background-color: #ffffff;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border-left: 4px solid #1E88E5;
-        margin: 1rem 0;
+        background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        border: 3px solid #4FC3F7;
+        margin: 1.5rem 0;
+        box-shadow: 0 3px 5px rgba(0,0,0,0.1);
     }
     .correct-answer {
-        background-color: #C8E6C9;
-        padding: 1rem;
-        border-radius: 5px;
-        border-left: 4px solid #4CAF50;
+        background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        border: 3px solid #66BB6A;
+        box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+        font-size: 1.1rem;
     }
     .wrong-answer {
-        background-color: #FFCDD2;
-        padding: 1rem;
-        border-radius: 5px;
-        border-left: 4px solid #F44336;
+        background: linear-gradient(135deg, #FFCDD2 0%, #EF9A9A 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        border: 3px solid #EF5350;
+        box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+        font-size: 1.1rem;
     }
     .stats-box {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%);
         color: white;
-        padding: 1.5rem;
-        border-radius: 10px;
+        padding: 2rem;
+        border-radius: 20px;
         text-align: center;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        border: 3px solid white;
+    }
+    .stats-box h2 {
+        font-size: 3rem;
+        margin: 0.5rem 0;
+    }
+    .stats-box h3 {
+        font-size: 1.5rem;
+        margin: 0.5rem 0;
+    }
+    /* Bigger, friendlier buttons */
+    .stButton > button {
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        border-radius: 15px;
+        border: 2px solid;
+        transition: transform 0.2s;
+    }
+    .stButton > button:hover {
+        transform: scale(1.05);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -87,22 +124,23 @@ if 'selected_grade' not in st.session_state:
 def main():
     """Main application"""
 
-    # Header
-    st.markdown('<h1 class="main-header">📚 Reading Comprehension Tool</h1>', unsafe_allow_html=True)
-    st.markdown("### Improve your reading skills with interactive passages and questions!")
+    # Header - Kid Friendly!
+    st.markdown('<h1 class="main-header">🌟 Let\'s Read Together! 📖</h1>', unsafe_allow_html=True)
+    st.markdown("### 🎉 Have fun reading stories and answering fun questions!")
 
     # Sidebar navigation
-    st.sidebar.title("Navigation")
+    st.sidebar.title("🎨 Menu")
+    st.sidebar.markdown("**Choose what you want to do:**")
     page = st.sidebar.radio(
-        "Choose a page:",
-        ["🏠 Home", "📖 Start Reading", "📊 Progress Report", "❓ Help"]
+        "",
+        ["🏠 Home", "📚 Read a Story", "⭐ My Progress", "❓ Help"]
     )
 
     if page == "🏠 Home":
         show_home()
-    elif page == "📖 Start Reading":
+    elif page == "📚 Read a Story":
         show_reading_practice()
-    elif page == "📊 Progress Report":
+    elif page == "⭐ My Progress":
         show_progress()
     elif page == "❓ Help":
         show_help()
@@ -110,10 +148,10 @@ def main():
 def show_home():
     """Show home page"""
 
-    # API Key Configuration Section
-    with st.expander("⚙️ API Configuration", expanded=not APIConfig.is_configured()):
+    # API Key Configuration Section (for parents/teachers)
+    with st.expander("⚙️ Settings (For Parents & Teachers)", expanded=False):
         st.markdown("### OpenAI API Key Setup")
-        st.info("💡 Enter your OpenAI API key to enable AI-powered features (optional for current reading tool)")
+        st.info("💡 Enter your OpenAI API key to enable AI-powered features (optional)")
 
         # Show current status
         current_key = APIConfig.get_api_key()
@@ -157,8 +195,8 @@ def show_home():
         st.markdown("""
         <div class="stats-box">
             <h2>📚</h2>
-            <h3>12 Passages</h3>
-            <p>Grade K-5</p>
+            <h3>12 Fun Stories!</h3>
+            <p>For all ages K-5</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -166,17 +204,17 @@ def show_home():
         st.markdown("""
         <div class="stats-box">
             <h2>🎯</h2>
-            <h3>8 Question Types</h3>
-            <p>Comprehensive Skills</p>
+            <h3>Lots of Questions!</h3>
+            <p>Learn & Have Fun</p>
         </div>
         """, unsafe_allow_html=True)
 
     with col3:
         st.markdown("""
         <div class="stats-box">
-            <h2>📈</h2>
-            <h3>Progress Tracking</h3>
-            <p>Monitor Growth</p>
+            <h2>⭐</h2>
+            <h3>See Your Stars!</h3>
+            <p>Track Your Progress</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -228,7 +266,7 @@ def show_home():
 
 def show_reading_practice():
     """Show reading practice interface"""
-    st.subheader("📖 Reading Practice")
+    st.subheader("📚 Let's Pick a Story!")
 
     # Step 1: Select grade level
     if not st.session_state.selected_grade:
@@ -248,7 +286,7 @@ def show_reading_practice():
 
 def select_grade():
     """Grade selection interface"""
-    st.markdown("### Step 1: Select Your Grade Level")
+    st.markdown("### 🎈 Step 1: What grade are you in?")
 
     levels = DifficultyLevel.get_all_levels()
 
@@ -270,7 +308,7 @@ def select_grade():
 
 def select_passage():
     """Passage selection interface"""
-    st.markdown(f"### Step 2: Select a Passage (Grade {st.session_state.selected_grade})")
+    st.markdown(f"### 📖 Step 2: Pick a story to read!")
 
     passages = PassageDatabase.get_passages_by_grade(st.session_state.selected_grade)
 
@@ -313,6 +351,49 @@ def show_passage_and_questions():
     st.markdown(f"### 📖 {passage.title}")
     st.caption(f"Grade {passage.grade} | {passage.type.title()}")
 
+    # Add Text-to-Speech functionality using OpenAI TTS
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    with col2:
+        # Voice selection
+        voice_options = {
+            "nova": "Nova (Female, Warm)",
+            "alloy": "Alloy (Neutral, Clear)",
+            "shimmer": "Shimmer (Female, Bright)",
+            "fable": "Fable (Male, Storyteller)"
+        }
+
+        selected_voice = st.selectbox(
+            "🎭 Choose a storyteller voice:",
+            options=list(voice_options.keys()),
+            format_func=lambda x: voice_options[x],
+            index=0  # Default to Nova
+        )
+
+        # Generate audio button
+        if st.button("🔊 Read Story to Me!", use_container_width=True, type="primary"):
+            try:
+                with st.spinner("🎙️ Preparing the story..."):
+                    # Generate audio file
+                    audio_path = TTSHelper.generate_speech(
+                        passage.content,
+                        voice=selected_voice
+                    )
+
+                    # Display audio player
+                    st.success("✨ Story is ready! Click play below 👇")
+                    audio_file = open(audio_path, 'rb')
+                    audio_bytes = audio_file.read()
+                    st.audio(audio_bytes, format='audio/mp3')
+                    audio_file.close()
+
+            except ValueError as e:
+                st.error(str(e))
+                st.info("💡 Please set your OpenAI API key in the Settings section on the Home page.")
+            except Exception as e:
+                st.error(f"Oops! Something went wrong: {str(e)}")
+                st.info("Please make sure your API key is valid and you have internet connection.")
+
     st.markdown('<div class="passage-card">', unsafe_allow_html=True)
     st.markdown(passage.content)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -320,8 +401,8 @@ def show_passage_and_questions():
     st.markdown("---")
 
     # Show questions
-    st.markdown("### 🎯 Comprehension Questions")
-    st.info("Read each question carefully and select your answer.")
+    st.markdown("### 🎯 Time for Questions!")
+    st.info("🌟 Read carefully and pick the best answer! You can do it!")
 
     for idx, question in enumerate(questions):
         st.markdown(f'<div class="question-card">', unsafe_allow_html=True)
@@ -366,7 +447,7 @@ def show_session_results():
     questions = st.session_state.current_questions
     evaluator = st.session_state.evaluator
 
-    st.markdown("### 🎉 Session Results")
+    st.markdown("### 🎉 Awesome! Let's See How You Did!")
 
     # Evaluate all answers
     results = []
@@ -386,29 +467,32 @@ def show_session_results():
     with col3:
         st.metric("Accuracy", f"{summary['accuracy']:.1f}%")
 
-    # Performance level
+    # Performance level with encouraging feedback
     performance = evaluator.get_performance_level(summary['accuracy'])
-    if summary['accuracy'] >= 80:
-        st.success(f"🌟 {performance}")
+    if summary['accuracy'] == 100:
+        st.balloons()
+        st.success(f"🌟🎉 PERFECT! You got them ALL right! You're a SUPER STAR! ⭐⭐⭐")
+    elif summary['accuracy'] >= 80:
+        st.success(f"🌟 {performance} - You're doing GREAT! Keep it up!")
     elif summary['accuracy'] >= 60:
-        st.info(f"👍 {performance}")
+        st.info(f"👍 {performance} - Good job! Practice makes perfect!")
     else:
-        st.warning(f"💪 {performance}")
+        st.warning(f"💪 {performance} - Keep trying! You're learning and getting better!")
 
     st.markdown("---")
 
     # Show individual results
-    st.markdown("### 📝 Question Review")
+    st.markdown("### 📝 Let's Review Your Answers!")
 
     for idx, (question, result) in enumerate(zip(questions, results)):
         user_answer = st.session_state.answers[idx]
 
         if result['correct']:
             st.markdown(f'<div class="correct-answer">', unsafe_allow_html=True)
-            st.markdown(f"**✓ Question {idx + 1}: Correct!**")
+            st.markdown(f"**✓ Question {idx + 1}: YES! That's Right! 🎉**")
         else:
             st.markdown(f'<div class="wrong-answer">', unsafe_allow_html=True)
-            st.markdown(f"**✗ Question {idx + 1}: Incorrect**")
+            st.markdown(f"**✗ Question {idx + 1}: Oops! Let's Learn Together 📚**")
 
         st.markdown(f"**{question.text}**")
         st.markdown(f"Your answer: **{user_answer}. {question.options[user_answer]}**")
