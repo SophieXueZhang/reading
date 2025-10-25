@@ -35,6 +35,9 @@ env/
 # User data
 data/user_progress.json
 
+# Environment variables (contains API keys)
+.env
+
 # OS
 .DS_Store
 Thumbs.db
